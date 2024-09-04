@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param (
     $libraries = @(),
-    $version = "1.85.0",
+    $version = "1.86.0",
 # 1: boost-cmake/ref_sha.cmake needs manual updating
 # 2: This script treats support statements as platform expressions. This is incorrect
 #    in a few cases e.g. boost-parameter-python not depending on boost-python for uwp since
@@ -26,10 +26,8 @@ if ($null -eq $vcpkg) {
 $semverVersion = ($version -replace "(\d+(\.\d+){1,3}).*", "`$1")
 
 # Clear this array when moving to a new boost version
-$defaultPortVersion = 1
+$defaultPortVersion = 0
 $portVersions = @{
-    'boost-container' = 1;
-    'boost-math' = 2;
 }
 
 function Get-PortVersion {
@@ -136,7 +134,7 @@ $portData = @{
             }
         }
     };
-    "boost-process"          = @{ "supports" = "!emscripten" };
+    "boost-process"          = @{ "supports" = "!uwp & !emscripten & !android" };
     "boost-python"           = @{ "supports" = "!uwp & !emscripten & !ios & !android"; "dependencies" = @("python3");};
     "boost-random"           = @{ "supports" = "!uwp" };
     "boost-regex"            = @{
@@ -181,6 +179,27 @@ function GeneratePortName() {
         [string]$Library
     )
     "boost-" + ($Library -replace "_", "-")
+}
+
+function GetPortHomepage() {
+    param (
+        [string]$Library
+    )
+
+    $specicalHomepagePaths = @{
+        "interval"           = "numeric/interval";
+        "numeric_conversion" = "numeric/conversion";
+        "odeint"             = "numeric/odeint";
+        "ublas"              = "numeric/ublas";
+    }
+
+    if ($specicalHomepagePaths.ContainsKey($Library)) {
+        $homepagePath = $specicalHomepagePaths[$Library]
+    } else {
+        $homepagePath = $Library
+    }
+
+    "https://www.boost.org/libs/" + $homepagePath
 }
 
 function GeneratePortDependency() {
@@ -318,13 +337,14 @@ function GeneratePort() {
     )
 
     $portName = GeneratePortName $Library
+    $homepage = GetPortHomepage  $Library
 
     New-Item -ItemType "Directory" "$portsDir/$portName" -erroraction SilentlyContinue | out-null
 
     # Generate vcpkg.json
     GeneratePortManifest `
         -PortName $portName `
-        -Homepage "https://www.boost.org/libs/$Library" `
+        -Homepage $homepage `
         -Description "Boost $Library module" `
         -License "BSL-1.0" `
         -Dependencies $Dependencies
@@ -602,6 +622,11 @@ foreach ($library in $libraries) {
         $deps = @($deps | Where-Object {
             -not (
                 ($library -eq 'gil' -and $_ -eq 'filesystem') # PR #20575
+            )
+        })
+        $deps = @($deps | Where-Object {
+            -not (
+                ($library -eq 'mysql' -and $_ -eq 'pfr')
             )
         })
 
