@@ -4,18 +4,18 @@
 vcpkg_from_github(
     OUT_SOURCE_PATH SOURCE_PATH
     REPO Azure/azure-sdk-for-cpp
-    REF 5f90646d3ed919b44447c20af5174ce589fb6e7c
-    SHA512 e792e4063ba17bfae1f8730f43a2dac56794c4c9509cd1be610edf4afb6cd4d87f5b08c36aca3806bf00345af756f6ef643d97cc6f8f59b71c0bb7c5b6ff603b
+    REF c3265d3e5b0acf0dcfd0c9ba9523514aee3e9544
+    SHA512 4ea3a382debc07ec7358c83d011c33d7177a81f7da1e82567f43c93f556d36df0fe2802da5f8b1ce51b15d2df9ce27af144ce72ca40874bcfb14fdfd3d9b34c7
     HEAD_REF main
 )
 
-if(EXISTS "${SOURCE_PATH}/sdk/storage/azure-storage-blobs")
-  file(REMOVE_RECURSE "${SOURCE_PATH}/sdk/storage/_")
+if(EXISTS "${SOURCE_PATH}/sdk/template/azure-template")
+  file(REMOVE_RECURSE "${SOURCE_PATH}/sdk/template/_")
   file(REMOVE_RECURSE "${SOURCE_PATH}/sdk/_")
   file(REMOVE_RECURSE "${SOURCE_PATH}/_")
 
-  file(RENAME "${SOURCE_PATH}/sdk/storage/azure-storage-blobs" "${SOURCE_PATH}/sdk/storage/_")
-  file(RENAME "${SOURCE_PATH}/sdk/storage" "${SOURCE_PATH}/sdk/_")
+  file(RENAME "${SOURCE_PATH}/sdk/template/azure-template" "${SOURCE_PATH}/sdk/template/_")
+  file(RENAME "${SOURCE_PATH}/sdk/template" "${SOURCE_PATH}/sdk/_")
   file(RENAME "${SOURCE_PATH}/sdk" "${SOURCE_PATH}/_")
 endif()
 
